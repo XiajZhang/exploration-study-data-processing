@@ -35,6 +35,7 @@ def get_session_aggregated(session_data):
         session_summary[col + "_sum"] = int(sum_data[col])
         # session_summary[col + "_avg"] = avg_data[col]
     session_summary['total_sum'] = int(sum_data.sum())
+    session_summary['decoding_explanation_sum'] = session_summary['decoding_sum'] + session_summary['explanation_sum']
     return session_summary
 
 if __name__ == "__main__":
