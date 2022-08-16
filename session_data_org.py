@@ -3,6 +3,25 @@ import os
 import warnings
 from pprint import pprint
 
+KEYWORDS = {
+    "1_farm_animals": [ "duck", "ewe", "hear", "howl", "cow", "beard", "goat", "sausage", "carts", "horse", "barn", "pool",
+        "hay", "claws", "sharpen", "wool", "horns", "paw","woolly", "roots", "shear", "farm", "chicken", "gallop", "lamb", "mouse",
+        "snout", "whistle", "pork", "farmer", "pig", "feathers"],
+    "2_the_legend_of_the_bluebonnet": [ "scoop","feathers","dancer","family","burn","juice", "sound","council","shadow","thrust","berry",
+        "doll","drought","flame","bone","comanche","handful","texas","warrior", "leggings","plentiful","wake","shaman","fill","belt","beaded","twig","listen",
+        "circle","gathering","blanket","alone","quietly","polished","sign","word","heart","drum","glow","miraculous","camp","ash"],
+    "3_the_little_house": ["brook","city","frost","carriage","pull","ripen","follow","leaves","countryside","light","garden","quiet","bud","automobile","crowded","daisy","bright","apartment","dump",
+        "harvest","gold","garage","apple","moonlight","coast","pool","road","blossom","fields"],
+    "4_the_little_house": ["grandmother","paint","quiet","dream","apple","light","cracked","lovely","apartment","husband","road","frightened","cellar","crooked","fields","moonlight","daisy",
+        "place","lonely","mover","bright","dirty","happily","glance","city","dust"],
+    "5_homes_around_the_world": ["ramp","fold","tongkonans","bamboo","stilt","jungle","tent","beehive","carved","container","alien","cave","wooden","toraja","boardwalk","ship","heated","strong","shape","school","fishermen",
+        "treehouse","spaceship","block","house","ground","rock","lake","planet","adobe","clay","warm","reed","material","bubble","bricks","igloo","float"],
+    "6_helpers_in_my_community": ["crossing guard","cement mixer","teacher","doctor","digger","helper","bulldozer","principal","librarian","crane","community","plumber","nurse","electrician","caretaker"],
+    "7_helpers_in_my_community": ["rescue","nurse","ambulance","doctor","emergency","dentist","medical","police officer","firefighter","hospital","helper","protect","paramedic"],
+    "8_from_sheep_to_sweater": ["healthy","grass","farm","straw","comb","bug","sweater","liquid","hay","dark","shape","rainbow","knit","color","store","truck","mud","wool","fleece",
+        "mixture","shopper","wash","needle","twist"]
+}
+
 def get_all_sessions_by_child(data_path):
 
     if not os.path.isdir(data_path):
@@ -103,7 +122,9 @@ if __name__ == "__main__":
                         'starting_msg_idx': message_idx,
                         'ending_msg_idx': -1,
                         'pages': [],
-                        'page_activities': []
+                        'page_activities': [],
+                        'pre_assessment': dict(),
+                        'post_assessment': dict()
                     }
                     current_tracking_story = (story_name, story_id)
             elif message['command'] == 'page info':
@@ -118,6 +139,23 @@ if __name__ == "__main__":
                         "page": current_page,
                         "activity": []
                     }
+            elif message['command'] == 'KEYWORD_ASSESSMENT_RESULT':
+                assessment_result = message['msgs']
+                if not assessment_result['has_assessment']:
+                    continue
+                keyword = assessment_result['keyword'][0]
+                if not current_tracking_story[1].startswith('0') and keyword not in KEYWORDS[current_tracking_story[1]]:
+                    continue
+                if assessment_result['pre_session']:
+                    if keyword in storybook_info[current_tracking_story[1]]['pre_assessment'].keys():
+                        continue
+                    else:
+                        storybook_info[current_tracking_story[1]]['pre_assessment'][keyword] = assessment_result['correct']
+                else:
+                    if keyword in storybook_info[current_tracking_story[1]]['post_assessment'].keys():
+                        continue
+                    else:
+                        storybook_info[current_tracking_story[1]]['post_assessment'][keyword] = assessment_result['correct']
             else:
                 if current_page == -1:
                     continue
